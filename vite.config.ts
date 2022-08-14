@@ -1,16 +1,15 @@
-import path from 'path';
+// import path from 'path';
 import { defineConfig } from 'vite';
 
 // https://vitejs.dev/config/
 export default defineConfig({
   build: {
+    lib: {
+      entry: 'src/index.ts',
+      formats: ['es']
+    },
     rollupOptions: {
-      external: /^lit/,
-      input: {
-        'viewer': path.resolve(__dirname, 'src/components/viewer.ts'),
-        'dragger': path.resolve(__dirname, 'src/components/dragger.ts'),
-        'interaction-controller': path.resolve(__dirname, 'src/controllers/interaction-controller.ts'),
-      }
+      // external: /^lit/,
     }
   }
 })

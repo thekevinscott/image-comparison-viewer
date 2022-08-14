@@ -2,11 +2,8 @@
   "name": "image-comparison-viewer",
   "version": "0.1.1",
   "exports": {
-    ".": "./dist/assets/viewer.fa6a039d.js",
-    "./dragger": "./dist/assets/dragger.c66e1e54.js",
-    "./interaction-controller": "./dist/assets/interaction-controller.d5f16872.js"
+    ".": "./dist/image-comparison-viewer.es.js"
   },
-  "types": "types/image-comparison-viewer.d.ts",
   "files": [
     "dist",
     "types"
