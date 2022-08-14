@@ -82,6 +82,7 @@ export class ImageComparisonViewer extends LitElement {
 
   render() {
     const { background, comparisonX } = this;
+    console.log(comparisonX)
     return html`
       <slot name="background">
         <image-comparison-viewer-background background=${background}></image-comparison-viewer-background>

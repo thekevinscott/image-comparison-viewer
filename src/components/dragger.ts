@@ -88,7 +88,7 @@ export class ImageComparisonViewerDraggerHandle extends LitElement {
   draggerRef: Ref<HTMLDivElement> = createRef();
 
   @property({ type: Number })
-  value = 0.5;
+  initialValue = 0.5;
 
   @state()
   x = 0;
@@ -107,13 +107,12 @@ export class ImageComparisonViewerDraggerHandle extends LitElement {
   }
 
   protected firstUpdated(_changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>): void {
-    this.updateMouse(this.value);
+    this.updateMouse(this.initialValue);
   }
 
-  updated(changedProperties: Map<string, any>) {
-    if (changedProperties.get('value') !== undefined) {
-      this.updateMouse(changedProperties.get('value'));
-    }
+  updated() {
+    const x = getX(this.mouse.x, this.getWidth());
+    this.dispatchEvent(new DraggerChangeEvent(x / this.getWidth()));
   }
 
   render() {
