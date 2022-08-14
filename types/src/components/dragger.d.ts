@@ -11,12 +11,12 @@ export declare class ImageComparisonViewerDraggerHandle extends LitElement {
     static styles: import("lit").CSSResult;
     private mouse;
     draggerRef: Ref<HTMLDivElement>;
-    value: number;
+    initialValue: number;
     x: number;
     getWidth(): number;
     updateMouse(value: number): void;
     protected firstUpdated(_changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>): void;
-    updated(changedProperties: Map<string, any>): void;
+    updated(): void;
     render(): import("lit").TemplateResult<1>;
 }
 declare global {
