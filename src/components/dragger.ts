@@ -1,5 +1,5 @@
 import { html, css, LitElement, PropertyValueMap } from 'lit'
-import { customElement, property, state } from 'lit/decorators.js'
+import { property, state } from 'lit/decorators.js'
 import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import {createRef, Ref, ref} from 'lit/directives/ref.js';
@@ -24,7 +24,6 @@ export class DraggerChangeEvent extends Event {
   }
 }
 
-@customElement('image-comparison-viewer-dragger-handle')
 export class ImageComparisonViewerDraggerHandle extends LitElement {
   static styles = css`
     #image-slider {
@@ -156,3 +155,4 @@ declare global {
   }
 }
 
+customElements.get('image-comparison-viewer-dragger-handle') || customElements.define('image-comparison-viewer-dragger-handle', ImageComparisonViewerDraggerHandle);

@@ -1,7 +1,5 @@
 import { html, css, LitElement } from 'lit'
-import { customElement } from 'lit/decorators.js'
 
-@customElement('image-comparison-viewer-images')
 export class ImageComparisonViewerImages extends LitElement {
   static styles = css`
     :host {
@@ -26,3 +24,4 @@ declare global {
   }
 }
 
+customElements.get('image-comparison-viewer-images') || customElements.define('image-comparison-viewer-images', ImageComparisonViewerImages);

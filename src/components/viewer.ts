@@ -1,5 +1,5 @@
 import { html, css, LitElement } from 'lit'
-import { customElement, property, state } from 'lit/decorators.js'
+import { property, state } from 'lit/decorators.js'
 import { styleMap } from 'lit/directives/style-map.js';
 import { Background } from './background';
 import './background';
@@ -7,7 +7,6 @@ import './mask';
 import './images';
 import { InteractionController } from '../controllers/interaction-controller';
 
-@customElement('image-comparison-viewer')
 export class ImageComparisonViewer extends LitElement {
   static styles = css`
     :host {
@@ -82,7 +81,6 @@ export class ImageComparisonViewer extends LitElement {
 
   render() {
     const { background, comparisonX } = this;
-    console.log(comparisonX)
     return html`
       <slot name="background">
         <image-comparison-viewer-background background=${background}></image-comparison-viewer-background>
@@ -105,3 +103,5 @@ declare global {
     'image-comparison-viewer': ImageComparisonViewer
   }
 }
+
+customElements.get('image-comparison-viewer') || customElements.define('image-comparison-viewer', ImageComparisonViewer);

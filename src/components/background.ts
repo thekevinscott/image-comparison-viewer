@@ -1,11 +1,10 @@
 import { html, css, LitElement } from 'lit'
-import { customElement, property } from 'lit/decorators.js'
+import { property } from 'lit/decorators.js'
 import { classMap } from 'lit/directives/class-map.js';
 
 export type Background = 'striped' | 'checkered';
 const BACKGROUNDS = ['checkered', 'striped'];
 
-@customElement('image-comparison-viewer-background')
 export class ImageComparisonViewerBackground extends LitElement {
   static styles = css`
     #background {
@@ -73,3 +72,4 @@ declare global {
   }
 }
 
+customElements.get('image-comparison-viewer-background') || customElements.define('image-comparison-viewer-background', ImageComparisonViewerBackground);

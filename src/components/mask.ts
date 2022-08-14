@@ -1,8 +1,7 @@
 import { html, css, LitElement } from 'lit'
-import { customElement, property } from 'lit/decorators.js'
+import { property } from 'lit/decorators.js'
 import { styleMap } from 'lit/directives/style-map.js';
 
-@customElement('image-comparison-viewer-mask')
 export class ImageComparisonViewerMask extends LitElement {
   static styles = css`
     .image-mask {
@@ -61,3 +60,4 @@ const getComparisonXPosition = (x: number) => {
   return x;
 }
 
+customElements.get('image-comparison-viewer-mask') || customElements.define('image-comparison-viewer-mask', ImageComparisonViewerMask);
