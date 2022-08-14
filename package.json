@@ -4,6 +4,7 @@
   "exports": {
     ".": "./dist/image-comparison-viewer.es.js"
   },
+  "types": "./types/src",
   "files": [
     "dist",
     "types"
