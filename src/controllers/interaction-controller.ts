@@ -15,6 +15,12 @@ export class InteractionController {
     this.y = startingPosition.y;
   }
 
+  setPosition({ x = 0, y = 0}: { x?: number; y?: number; } = {}) {
+    this.x = x;
+    this.y = y;
+    this.host.requestUpdate();
+  }
+
   private handleMouseDown = (e: MouseEvent) => {
     this.imageMoveStart(e.clientX, e.clientY);
   }

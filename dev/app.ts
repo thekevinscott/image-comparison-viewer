@@ -29,7 +29,6 @@ export class ImageComparisonViewerApp extends LitElement {
     background: 'striped',
     comparisonX: .5,
     zoom: 1,
-
   };
 
   handleChange = ({ detail }: FilterChangeEvent) => {
@@ -44,10 +43,10 @@ export class ImageComparisonViewerApp extends LitElement {
 
   render() {
     const { handleChange, handleDrag, values } = this;
-    console.log(values)
+    console.log(this.values.comparisonX)
     return html`
       <div id="container">
-        <image-comparison-viewer-dragger-handle @dragger-change-event=${handleDrag}></image-comparison-viewer-dragger-handle>
+        <image-comparison-viewer-dragger-handle value=${this.values.comparisonX} @dragger-change-event=${handleDrag}></image-comparison-viewer-dragger-handle>
         <image-comparison-viewer zoom=${values['zoom']} background="${values['background']}" comparisonX=${values['comparisonX']}>
           <slot></slot>
         </image-comparison-viewer>

@@ -1,5 +1,5 @@
-import { html, css, LitElement } from 'lit'
-import { customElement } from 'lit/decorators.js'
+import { html, css, LitElement, PropertyValueMap } from 'lit'
+import { customElement, property, state } from 'lit/decorators.js'
 import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import {createRef, Ref, ref} from 'lit/directives/ref.js';
@@ -87,17 +87,38 @@ export class ImageComparisonViewerDraggerHandle extends LitElement {
 
   draggerRef: Ref<HTMLDivElement> = createRef();
 
-  updated() {
-    const { mouse, parentElement } = this;
-    const parent = parentElement as HTMLElement;
-    const x = getX(mouse.x, parent);
-    const width = parent.getBoundingClientRect().width;
-    this.dispatchEvent(new DraggerChangeEvent(x / width));
+  @property({ type: Number })
+  value = 0.5;
+
+  @state()
+  x = 0;
+
+  getWidth() {
+    const parent = this.parentElement as HTMLElement;
+    return parent.getBoundingClientRect().width;
+  }
+
+  updateMouse(value: number) {
+    const width = this.getWidth();
+    const x = value * width;
+    this.mouse.setPosition({
+      x,
+    });
+  }
+
+  protected firstUpdated(_changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>): void {
+    this.updateMouse(this.value);
+  }
+
+  updated(changedProperties: Map<string, any>) {
+    if (changedProperties.get('value') !== undefined) {
+      this.updateMouse(changedProperties.get('value'));
+    }
   }
 
   render() {
-    const { mouse, draggerRef, parentElement } = this;
-    const x = getX(mouse.x, parentElement as HTMLElement);
+    const { mouse, draggerRef } = this;
+    console.log('mouse x', mouse.x);
     return html`
       <div
         id="image-slider"
@@ -106,7 +127,7 @@ export class ImageComparisonViewerDraggerHandle extends LitElement {
           active: mouse.active,
         })}
         style=${styleMap({
-          transform: `translate(${x}px, 0)`,
+          transform: `translate(${mouse.x}px, 0)`,
         })}
         @click
       >
@@ -118,9 +139,7 @@ export class ImageComparisonViewerDraggerHandle extends LitElement {
   }
 }
 
-const getX = (x: number, parent: HTMLElement) => {
-  const width = parent.getBoundingClientRect().width;
-
+const getX = (x: number, width: number) => {
   if (x < 0) {
     return 0;
   }

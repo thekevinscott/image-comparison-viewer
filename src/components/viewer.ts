@@ -25,7 +25,6 @@ export class ImageComparisonViewer extends LitElement {
       position: absolute;
       top: 50%;
       left: 50%;
-      transform: translate(-50%, -50%);
       user-drag: none;  
       user-select: none;
       -moz-user-select: none;
@@ -66,8 +65,14 @@ export class ImageComparisonViewer extends LitElement {
   renderImage(img?: HTMLImageElement) {
     if (img) {
       const { zoom, mouse } = this;
+      const x = mouse.x;
+      const y = mouse.y;
+        // transform: `scale(${zoom}) translate(${mouse.x / zoom}px, ${mouse.y / zoom}px)`,
       const style = styleMap({
-        transform: `scale(${zoom}) translate(${mouse.x / zoom}px, ${mouse.y / zoom}px)`,
+        // transform: `scale(${zoom}) translate(${mouse.x / zoom}px, ${mouse.y / zoom}px)`,
+        transform: `scale(${zoom}) translate(calc(${x}px), calc(${y}px))`,
+        left: `calc(50% - ${img.width / 2}px)`,
+        top: `calc(50% - ${img.height / 2}px)`,
       });
       return html`<img style=${style} src="${img.src}" />`;
     }

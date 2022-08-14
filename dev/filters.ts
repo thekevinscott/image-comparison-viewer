@@ -52,10 +52,6 @@ export class ImageComparisonViewerFilters extends LitElement {
         <option>checkered</option>
         </select>
       </div>
-      <div>
-        <label>Comparison X</label>
-        <input type="range" min="0" max="1" step="0.01" name="comparisonX" value="${values['comparisonX']}" @input=${handleChange} />
-      </div>
     `;
   }
 }

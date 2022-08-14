@@ -1,6 +1,6 @@
 {
   "name": "image-comparison-viewer",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "exports": {
     ".": "./dist/assets/viewer.fa6a039d.js",
     "./dragger": "./dist/assets/dragger.c66e1e54.js",
