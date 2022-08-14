@@ -118,7 +118,7 @@ export class ImageComparisonViewerDraggerHandle extends LitElement {
 
   render() {
     const { mouse, draggerRef } = this;
-    console.log('mouse x', mouse.x);
+    const x = getX(mouse.x, this.getWidth());
     return html`
       <div
         id="image-slider"
@@ -127,7 +127,7 @@ export class ImageComparisonViewerDraggerHandle extends LitElement {
           active: mouse.active,
         })}
         style=${styleMap({
-          transform: `translate(${mouse.x}px, 0)`,
+          transform: `translate(${x}px, 0)`,
         })}
         @click
       >

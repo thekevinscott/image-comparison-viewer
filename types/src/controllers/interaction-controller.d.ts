@@ -12,6 +12,10 @@ export declare class InteractionController {
         x: number;
         y: number;
     });
+    setPosition({ x, y }?: {
+        x?: number;
+        y?: number;
+    }): void;
     private handleMouseDown;
     private handleTouchStart;
     private imageMoveStart;
