@@ -1,0 +1,26 @@
+{
+  "name": "image-comparison-viewer",
+  "version": "0.1.0",
+  "exports": {
+    ".": "./dist/assets/viewer.fa6a039d.js",
+    "./dragger": "./dist/assets/dragger.c66e1e54.js",
+    "./interaction-controller": "./dist/assets/interaction-controller.d5f16872.js"
+  },
+  "types": "types/image-comparison-viewer.d.ts",
+  "files": [
+    "dist",
+    "types"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build"
+  },
+  "dependencies": {
+    "lit": "^2.0.2"
+  },
+  "devDependencies": {
+    "@types/node": "^18.7.3",
+    "typescript": "^4.5.4",
+    "vite": "^2.9.15"
+  }
+}
