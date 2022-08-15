@@ -41,17 +41,27 @@ export class ImageComparisonViewerApp extends LitElement {
     this.requestUpdate();
   }
 
+  @state()
+  imageKind = 'jellyfish'
+
+  switch = () => {
+    this.imageKind = this.imageKind === 'jellyfish' ? 'dog' : 'jellyfish';
+  }
+
   render() {
-    const { handleChange, handleDrag, values } = this;
-    console.log(this.values.comparisonX)
+    const { imageKind, handleChange, handleDrag, values } = this;
     return html`
       <div id="container">
         <image-comparison-viewer-dragger-handle initialValue=${this.values.comparisonX} @dragger-change-event=${handleDrag}></image-comparison-viewer-dragger-handle>
         <image-comparison-viewer zoom=${values['zoom']} background="${values['background']}" comparisonX=${values['comparisonX']}>
-          <slot></slot>
+          <img src="./assets/${imageKind}-a.jpg" />
+          <img src="./assets/${imageKind}-b.jpg" />
         </image-comparison-viewer>
       </div id="container">
       <image-comparison-viewer-filters @filter-change-event=${handleChange} .values=${values}></image-comparison-viewer-filters>
+      <hr />
+      Showing ${imageKind} as the image. <br />
+      <button @click=${this.switch}>Switch the image to ${imageKind === 'jellyfish' ? 'dog' : 'jellyfish'}</button>
     `;
   }
 }

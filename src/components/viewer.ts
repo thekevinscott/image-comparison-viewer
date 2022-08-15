@@ -1,5 +1,5 @@
 import { html, css, LitElement } from 'lit'
-import { property, state } from 'lit/decorators.js'
+import { property, query, state } from 'lit/decorators.js'
 import { styleMap } from 'lit/directives/style-map.js';
 import { Background } from './background';
 import './background';
@@ -18,18 +18,27 @@ export class ImageComparisonViewer extends LitElement {
       touch-action: manipulation;
       cursor: grab;
     }
+    
+    ::slotted(img) {
+      display: none;
+    }
 
-    ::slotted(img), img {
+    img {
       display: block;
-      position: absolute;
-      top: 50%;
-      left: 50%;
       user-drag: none;  
       user-select: none;
       -moz-user-select: none;
       -webkit-user-drag: none;
       -webkit-user-select: none;
       -ms-user-select: none;
+    }
+
+    .image-container {
+      height: 100%;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
   `
   private mouse: InteractionController = new InteractionController(this);
@@ -46,34 +55,54 @@ export class ImageComparisonViewer extends LitElement {
   @state()
   images: HTMLImageElement[] | undefined;
 
-  handleSlotchange(e: any) {
-    const target = e.target;
-    if (isSlotElement(target)) {
-      const childNodes = target.assignedNodes({ flatten: true }).filter(el => (<Element>el).tagName === 'IMG') as HTMLImageElement[];
-      if (childNodes.length > 2) {
-        console.warn('Only two images are supported')
-      } else if (childNodes.length == 2) {
-        this.images = childNodes;
-        this.images.forEach(img => img.remove());
-      } else if (childNodes.length == 1) {
-        childNodes.forEach(node => node.remove());
-      }
+  @query('#slot')
+  mainSlot?: HTMLSlotElement;
+
+  getChildNodes(): Array<HTMLImageElement> {
+    return this.mainSlot?.assignedNodes({ flatten: true }).filter(el => (<Element>el).tagName === 'IMG') as HTMLImageElement[] || [];
+  }
+
+  observer: MutationObserver;
+
+  constructor() {
+    super();
+    const requestUpdate = () => this.requestUpdate();
+    this.observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === "attributes") {
+          requestUpdate();
+        }
+      });
+    });
+  }
+
+  handleSlotchange() {
+    const requestUpdate = () => this.requestUpdate();
+    const childNodes = this.getChildNodes();
+    if (childNodes.length > 2) {
+      console.warn('Only two images are supported')
+    } else {
+      this.images = childNodes;
+      this.observer.disconnect();
+      requestUpdate();
+
+      this.images.forEach(image => {
+        this.observer.observe(image, {
+          attributes: true,
+        });
+      })
     }
   }
 
   renderImage(img?: HTMLImageElement) {
     if (img) {
       const { zoom, mouse } = this;
-      const x = mouse.x;
-      const y = mouse.y;
-        // transform: `scale(${zoom}) translate(${mouse.x / zoom}px, ${mouse.y / zoom}px)`,
+      const x = mouse.x / zoom;
+      const y = mouse.y / zoom;
       const style = styleMap({
-        // transform: `scale(${zoom}) translate(${mouse.x / zoom}px, ${mouse.y / zoom}px)`,
         transform: `scale(${zoom}) translate(calc(${x}px), calc(${y}px))`,
-        left: `calc(50% - ${img.width / 2}px)`,
-        top: `calc(50% - ${img.height / 2}px)`,
       });
-      return html`<img style=${style} src="${img.src}" />`;
+      return html`<div class="image-container"><img style=${style} src="${img.src}" /></div>`;
     }
 
     return null;
@@ -86,7 +115,7 @@ export class ImageComparisonViewer extends LitElement {
         <image-comparison-viewer-background background=${background}></image-comparison-viewer-background>
       </slot>
       <image-comparison-viewer-images>
-        <slot @slotchange=${this.handleSlotchange}></slot>
+        <slot id="slot" @slotchange=${this.handleSlotchange}></slot>
          ${this.renderImage(this.images?.[0])}
          <image-comparison-viewer-mask comparisonX=${comparisonX}>
           ${this.renderImage(this.images?.[1])}
@@ -95,8 +124,6 @@ export class ImageComparisonViewer extends LitElement {
     `
   }
 }
-
-const isSlotElement = (el: null | Element): el is HTMLSlotElement => el instanceof HTMLSlotElement;
 
 declare global {
   interface HTMLElementTagNameMap {
