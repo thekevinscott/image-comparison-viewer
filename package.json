@@ -1,13 +1,13 @@
 {
   "name": "image-comparison-viewer",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "exports": {
     ".": "./dist/image-comparison-viewer.es.js"
   },
   "types": "./types",
   "files": [
-    "dist",
-    "types",
+    "./dist",
+    "./types",
     "./assets/image-comparison-viewer-demo.gif"
   ],
   "scripts": {
