@@ -19,8 +19,8 @@ export class ImageComparisonViewerBackground extends LitElement {
     .striped {
       background: repeating-linear-gradient(
         -45deg,
-        #fff,
-        #fff 10px,
+        transparent,
+        transparent 10px,
         rgba(4, 60, 94, 0.1) 10px,
         rgba(4, 60, 94, 0.1) 20px
       );
@@ -28,7 +28,7 @@ export class ImageComparisonViewerBackground extends LitElement {
 
     .checkered {
       background: repeating-conic-gradient(
-        #fff 0 90deg,
+        transparent 0 90deg,
         rgba(4, 60, 94, 0.1) 0 180deg)
       0 0/30px 30px round;
     }
