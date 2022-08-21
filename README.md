@@ -2,7 +2,7 @@
 
 Compare two images.
 
-<img src="./assets/image-comparison-viewer-demo.gif" />
+<img src="https://github.com/thekevinscott/image-comparison-viewer/raw/main/assets/image-comparison-viewer-demo.gif" />
 
 ## Install
 
