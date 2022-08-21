@@ -43,14 +43,10 @@ export class ImageComparisonViewerDraggerHandle extends LitElement {
       cursor: grab;
     }
 
-    #image-slider:hover #image-slider-bar {
-      border: 1px solid #DF3373;
-      background:  #FB5895;
-      width: 4px;
-    }
+    #image-slider:hover #image-slider-bar,
     #image-slider.active #image-slider-bar {
-      border: 1px solid #DF3373;
-      background:  #FB5895;
+      border: 1px solid #006aa0;
+      background: #0284c7;
       width: 4px;
     }
 
