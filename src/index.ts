@@ -1,5 +1,5 @@
 import "./components/viewer";
-import "./components/dragger";
+import "./components/handle";
 
 export { ImageComparisonViewer } from './components/viewer';
-export { DraggerChangeEvent, ImageComparisonViewerDraggerHandle } from './components/dragger';
+export { DraggerChangeEvent, ImageComparisonViewerDraggerHandle } from './components/handle';
