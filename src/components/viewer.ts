@@ -6,6 +6,7 @@ import './background';
 import './mask';
 import './images';
 import { InteractionController } from '../controllers/interaction-controller';
+import Hammer from 'hammerjs';
 
 export class ImageComparisonViewer extends LitElement {
   static styles = css`
@@ -74,6 +75,22 @@ export class ImageComparisonViewer extends LitElement {
         }
       });
     });
+
+    const mc = new Hammer.Manager(this);
+    mc.add(new Hammer.Pinch({ threshold: 0 }));
+
+
+    // subscribe to events
+    mc.on('rotate', function (e) {
+      console.log(e);
+    });
+    // function log(ev) {
+    //   console.log(ev);
+    //  }
+     
+    //  document.body.addEventListener('touchstart', log, false);
+    //  document.body.addEventListener('touchmove', log, false);
+    //  document.body.addEventListener('touchend', log, false);
   }
 
   handleSlotchange() {

@@ -2,9 +2,9 @@ import { html, css, LitElement } from 'lit'
 import { customElement, state } from 'lit/decorators.js'
 import { FilterChangeEvent } from './filters';
 import '../src/components/viewer';
-import '../src/components/dragger';
+import '../src/components/handle';
 import './filters';
-import { DraggerChangeEvent } from '../src/components/dragger';
+import { DraggerChangeEvent } from '../src/components/handle';
 
 @customElement('image-comparison-viewer-app')
 export class ImageComparisonViewerApp extends LitElement {
