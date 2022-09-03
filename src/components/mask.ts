@@ -6,11 +6,6 @@ export class ImageComparisonViewerMask extends LitElement {
   static styles = css`
     .image-mask {
       overflow: hidden;
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
       z-index: 1;
     }
 
@@ -25,13 +20,34 @@ export class ImageComparisonViewerMask extends LitElement {
   `
 
   @property({ type: Number })
+  width = 0;
+
+  @property({ type: Number })
+  height = 0;
+
+  @property({ type: Number })
+  zoom = 0;
+
+  @property({ type: Number })
+  x = 0;
+
+  @property({ type: Number })
+  y = 0;
+
+  @property({ type: Number })
   comparisonX = .5
 
+  getTransform() {
+    const { x, y, zoom, comparisonX } = this;
+    const comparisonXPosition = getComparisonXPosition(comparisonX);
+    return `scale(${zoom}) translate(calc(${comparisonXPosition * 100}% + ${x / zoom}px), ${y / zoom}px)`;
+  }
+
   render() {
-    const { comparisonX } = this;
+    const { width, height, comparisonX } = this;
     const comparisonXPosition = getComparisonXPosition(comparisonX);
     return html`
-      <div class="image-mask" style=${styleMap({transform: `translate(${comparisonXPosition * 100}%, 0)`})}>
+      <div class="image-mask" style=${styleMap({ width: `${width}px`, height: `${height}px`, transform: this.getTransform() })}>
         <div class="image-mask-inner" style=${styleMap({ transform: `translate(${comparisonXPosition * -100}%, 0)` })}>
           <slot></slot>
         </div>

@@ -7,12 +7,14 @@ export class InteractionController {
   x = 0
   y = 0
   startingPosition = { x: 0, y: 0 };
+  preventDefault = false;
 
-  constructor(host: LitElement, startingPosition = { x: 0, y: 0}) {
+  constructor(host: LitElement, startingPosition = { x: 0, y: 0}, { preventDefault = false }: { preventDefault?: boolean } = {}) {
     this.host = host;
     host.addController(this);
     this.x = startingPosition.x;
     this.y = startingPosition.y;
+    this.preventDefault = preventDefault;
   }
 
   setPosition({ x = 0, y = 0}: { x?: number; y?: number; } = {}) {
@@ -22,20 +24,25 @@ export class InteractionController {
   }
 
   private handleMouseDown = (e: MouseEvent) => {
-    this.imageMoveStart(e.clientX, e.clientY);
+    this.moveStart(e.clientX, e.clientY, e);
   }
 
   private handleTouchStart = (e: TouchEvent) => {
-    this.imageMoveStart(e.touches[0].clientX, e.touches[0].clientY);
+    this.moveStart(e.touches[0].clientX, e.touches[0].clientY, e);
   }
 
-  private imageMoveStart = (x: number, y: number) => {
-    this.active = true;
-    this.startingPosition = {
-      x: x - this.x,
-      y: y - this.y,
+  private moveStart = (x: number, y: number, e: MouseEvent | TouchEvent) => {
+    if (!e.defaultPrevented) {
+      if (this.preventDefault) {
+        e.preventDefault();
+      }
+      this.active = true;
+      this.startingPosition = {
+        x: x - this.x,
+        y: y - this.y,
+      }
+      this.host.requestUpdate();
     }
-    this.host.requestUpdate();
   }
 
   private end = () => {
@@ -44,15 +51,18 @@ export class InteractionController {
   }
 
   private handleTouchMove = (e: TouchEvent) => {
-    this.imageMove(e.touches[0].clientX, e.touches[0].clientY);
+    this.move(e.touches[0].clientX, e.touches[0].clientY, e);
   }
 
   private handleMouseMove = (e: MouseEvent) => {
-    this.imageMove(e.clientX, e.clientY);
+    this.move(e.clientX, e.clientY, e);
   }
 
-  private imageMove = (x: number, y: number) => {
-    if (this.active) {
+  private move = (x: number, y: number, e: MouseEvent | TouchEvent) => {
+    if (this.active && !e.defaultPrevented) {
+      if (this.preventDefault) {
+        e.preventDefault();
+      }
       this.x = x - this.startingPosition.x;
       this.y = y - this.startingPosition.y;
       this.host.requestUpdate();
