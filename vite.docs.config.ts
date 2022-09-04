@@ -1,4 +1,4 @@
-import { resolve } from 'path';
+import { resolve, join } from 'path';
 import { defineConfig } from 'vite';
 
 // https://vitejs.dev/config/
@@ -7,11 +7,12 @@ export default defineConfig({
     host: '0.0.0.0',
   },
   build: {
-    lib: {
-      entry: 'src/index.ts',
-      formats: ['es']
-    },
+    outDir: join(__dirname, "docs"),
     rollupOptions: {
+      input: {
+        main: resolve(__dirname, 'index.html'),
+
+      },
       // external: /^lit/,
     }
   }

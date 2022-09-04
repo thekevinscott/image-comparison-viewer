@@ -1,4 +1,4 @@
-import { html, css, LitElement, PropertyValueMap } from 'lit'
+import { html, css, PropertyValueMap } from 'lit'
 import { property, query, state } from 'lit/decorators.js'
 import { styleMap } from 'lit/directives/style-map.js';
 import { Background } from './background';
@@ -94,6 +94,9 @@ export class ImageComparisonViewer extends InteractiveElement {
     mc.add(new Hammer.Pinch({ threshold: 0 }));
 
 
+    mc.on('pinch', function (e) {
+      console.log(e);
+    });
     // subscribe to events
     mc.on('rotate', function (e) {
       console.log(e);
@@ -110,7 +113,6 @@ export class ImageComparisonViewer extends InteractiveElement {
   handleSlotchange() {
     const requestUpdate = () => this.requestUpdate();
     const childNodes = this.getChildNodes();
-    console.log(childNodes);
     if (childNodes.length > 2) {
       console.warn('Only two images are supported')
     } else {

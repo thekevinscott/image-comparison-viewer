@@ -11,7 +11,8 @@
   ],
   "scripts": {
     "dev": "vite",
-    "build": "tsc -c tsconfig.build.json && vite build"
+    "build": "tsc -p tsconfig.build.json && vite build",
+    "build:docs": "vite build --config vite.docs.config.ts"
   },
   "dependencies": {
     "hammerjs": "^2.0.8",

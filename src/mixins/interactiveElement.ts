@@ -66,8 +66,8 @@ export class InteractiveElement extends LitElement {
   }
 
   protected setupListeners(host: LitElement | HTMLDivElement) {
-    host.addEventListener('mousedown', this.handleMouseDown);
-    host.addEventListener('touchstart', this.handleTouchStart);
+    host.addEventListener('mousedown', e => this.handleMouseDown(e as MouseEvent));
+    host.addEventListener('touchstart', e => this.handleTouchStart(e as TouchEvent));
 
     window.addEventListener('mousemove', this.handleMouseMove);
     window.addEventListener('touchmove', this.handleTouchMove);
