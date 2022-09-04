@@ -1,6 +1,6 @@
 {
   "name": "image-comparison-viewer",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "exports": {
     ".": "./dist/image-comparison-viewer.es.js"
   },
@@ -14,7 +14,6 @@
     "build": "tsc -c tsconfig.build.json && vite build"
   },
   "dependencies": {
-    "hammer-touchemulator": "^0.0.2",
     "hammerjs": "^2.0.8",
     "lit": "^2.0.2"
   },
