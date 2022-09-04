@@ -193,12 +193,12 @@ export class ImageComparisonViewer extends InteractiveElement {
         <slot id="slot" @slotchange=${this.handleSlotchange}></slot>
         <div class="center-container">
          ${this.renderImage(this.images?.[0])}
-         </div>
-         <div class="center-container">
-         <image-comparison-viewer-mask comparisonX=${comparisonx} width=${this.images?.[1].width} height=${this.images?.[1].height} zoom=${zoom} x=${x} y=${y}>
-          <img src="${this.images?.[1].src}" />
-         </image-comparison-viewer-mask>
-         </div>
+        </div>
+        <div class="center-container">
+          <image-comparison-viewer-mask comparisonX=${comparisonx} width=${this.images?.[1].width} height=${this.images?.[1].height} zoom=${zoom} x=${x} y=${y}>
+            <img src="${this.images?.[1].src}" />
+          </image-comparison-viewer-mask>
+        </div>
       </image-comparison-viewer-images>
       ${imageSize && html`
         <div class="center-container">

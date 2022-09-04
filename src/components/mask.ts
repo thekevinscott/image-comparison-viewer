@@ -6,10 +6,12 @@ export class ImageComparisonViewerMask extends LitElement {
   static styles = css`
     .image-mask {
       overflow: hidden;
-      z-index: 1;
+      z-index: 2;
+      clip-path: content-box;
     }
 
     .image-mask-inner {
+      overflow: hidden;
       position: absolute;
       top: 0;
       left: 0;
