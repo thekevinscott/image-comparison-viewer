@@ -4,6 +4,8 @@ Compare two images.
 
 <img src="https://github.com/thekevinscott/image-comparison-viewer/raw/main/assets/image-comparison-viewer-demo.gif" />
 
+View a demo at [https://image-comparison-viewer.netlify.app](https://image-comparison-viewer.netlify.app).
+
 ## Install
 
 ```
