@@ -4,6 +4,10 @@ import { FilterChangeEvent } from './filters';
 import '../src/components/viewer';
 import '../src/components/handle';
 import './filters';
+import jellyfishA from './assets/jellyfish-a.jpg';
+import jellyfishB from './assets/jellyfish-b.jpg';
+import dogA from './assets/dog-a.jpg';
+import dogB from './assets/dog-b.jpg';
 // import { DraggerChangeEvent } from '../src/components/handle';
 
 @customElement('image-comparison-viewer-app')
@@ -58,8 +62,8 @@ export class ImageComparisonViewerApp extends LitElement {
     return html`
       <div id="container">
         <image-comparison-viewer zoom=${values['zoom']} background="${values['background']}">
-          <img src="./assets/${imageKind}-a.jpg" />
-          <img src="./assets/${imageKind}-b.jpg" />
+          <img src="${imageKind === 'jellyfish' ? jellyfishA : dogA}" />
+          <img src="${imageKind === 'jellyfish' ? jellyfishB : dogB}" />
         </image-comparison-viewer>
       </div id="container">
       <image-comparison-viewer-filters @filter-change-event=${handleChange} .values=${values}></image-comparison-viewer-filters>
