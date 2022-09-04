@@ -61,6 +61,9 @@ export class ImageComparisonViewer extends InteractiveElement {
   zoom = 1
 
   @state()
+  startingZoom = 1
+
+  @state()
   comparisonx = .5
 
   @state()
@@ -78,6 +81,9 @@ export class ImageComparisonViewer extends InteractiveElement {
 
   observer: MutationObserver;
 
+  @state()
+  isPinching = true;
+
   constructor() {
     super();
     this.setupListeners(this);
@@ -94,20 +100,20 @@ export class ImageComparisonViewer extends InteractiveElement {
     mc.add(new Hammer.Pinch({ threshold: 0 }));
 
 
-    mc.on('pinch', function (e) {
-      console.log(e);
+    mc.on('pinchstart', () => {
+      this.isPinching = true;
+      this.canMove = false;
+      this.startingZoom = this.zoom;
     });
-    // subscribe to events
-    mc.on('rotate', function (e) {
-      console.log(e);
+    mc.on('pinchend', () => {
+      this.isPinching = false;
+      this.canMove = true;
+      this.startingZoom = this.zoom;
     });
-    // function log(ev) {
-    //   console.log(ev);
-    //  }
-     
-    //  document.body.addEventListener('touchstart', log, false);
-    //  document.body.addEventListener('touchmove', log, false);
-    //  document.body.addEventListener('touchend', log, false);
+
+    mc.on('pinch', (e) => {
+      this.zoom = e.scale * this.startingZoom;
+    });
   }
 
   handleSlotchange() {
@@ -149,7 +155,6 @@ export class ImageComparisonViewer extends InteractiveElement {
 
   handleDrag = ({ detail }: DraggerChangeEvent) => {
     this.comparisonx = detail.x;
-    // console.log('handled', this.comparisonx);
     this.requestUpdate();
   }
 
