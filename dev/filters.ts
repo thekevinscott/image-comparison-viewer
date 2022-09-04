@@ -43,7 +43,7 @@ export class ImageComparisonViewerFilters extends LitElement {
     return html`
       <div>
         <label>Zoom</label>
-        <input type="range" min="0" max="4" step="0.01" name="zoom" value="${values['zoom']}" @input=${handleChange} />
+        <input type="range" min="0.1" max="4" step="0.01" name="zoom" value="${values['zoom']}" @input=${handleChange} />
       </div>
       <div>
         <label>Background</label>

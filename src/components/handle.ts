@@ -1,9 +1,9 @@
-import { html, css, LitElement, PropertyValueMap } from 'lit'
-import { property, state } from 'lit/decorators.js'
+import { html, css, PropertyValueMap } from 'lit'
+import { property, query, state } from 'lit/decorators.js'
 import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import {createRef, Ref, ref} from 'lit/directives/ref.js';
-import { InteractiveLitElement } from '../controllers/interaction-controller';
+import { InteractiveElement } from '../mixins/interactiveElement';
 
 type DraggerChangeEventDetail = {
   x: number;
@@ -24,9 +24,44 @@ export class DraggerChangeEvent extends Event {
   }
 }
 
-export class ImageComparisonViewerDraggerHandle extends LitElement {
+type Position = [number, number];
+
+type GetContainerStyle = (props: {
+  imageSize: Position;
+  zoom: number;
+  position: Position;
+}) => Record<string, string>;
+const getContainerStyle: GetContainerStyle = ({
+  imageSize: [imageSizeWidth, imageSizeHeight],
+  position: [positionX, positionY],
+  zoom,
+}) => {
+  // const { height, width } = this.getRect();
+  // const y = this.y / zoom;
+  // const x = this.x / zoom;
+  // const top = ((height / 2) - (imageSize.height / 2 * zoom) - 2 + (y * zoom));
+  // const left = ((width / 2) - (imageSize.width / 2 * zoom) + (x * zoom) + 0);
+  // // this.comparisonx = left / width;
+  // // console.log('new', this.comparisonx)
+  // // console.log('left', left, 'width', width, 'comparisonX', this.comparisonx);
+  const x = positionX;
+  const y = positionY;
+  // return `scale(${this.zoom}) translate(calc(${x}px), calc(${y}px))`;
+  return {
+    transform: `translate(calc(${x}px), calc(${y}px))`,
+    height: `${imageSizeHeight * zoom}px`,
+    width: `${imageSizeWidth * zoom}px`,
+    // transform: `scale(${zoom}`,
+  };
+}
+
+export class ImageComparisonViewerDraggerHandle extends InteractiveElement {
   static styles = css`
-    #image-slider {
+    #container {
+      position: relative;
+      z-index: 2;
+    }
+    #handle {
       margin: 0;
       padding: 0;
       height: 100%;
@@ -43,14 +78,14 @@ export class ImageComparisonViewerDraggerHandle extends LitElement {
       cursor: grab;
     }
 
-    #image-slider:hover #image-slider-bar,
-    #image-slider.active #image-slider-bar {
+    #handle:hover #handle-bar,
+    #handle.active #handle-bar {
       border: 1px solid #006aa0;
       background: #0284c7;
       width: 4px;
     }
 
-    #image-slider-bar {
+    #handle-bar {
       transition-duration: 0.1s;
       background: white;
       border: 1px solid #043C5E;
@@ -58,7 +93,7 @@ export class ImageComparisonViewerDraggerHandle extends LitElement {
       height: calc(100% - 10px);
     }
 
-    .image-slider-dot {
+    .handle-dot {
       border: 1px solid #DF3373;
       background:  #FB5895;
       transition-duration: 0.1s;
@@ -73,14 +108,45 @@ export class ImageComparisonViewerDraggerHandle extends LitElement {
       margin-left: -6px;
     }
 
-    .image-slider-dot.bottom {
+    .handle-dot.bottom {
       top: calc(100% - 5px);
+    }
+
+    #handle.small > .handle-dot {
+      width: 5px;
+      height: 5px;
+      top: -2.5px;
+      margin-left: -3px;
+    }
+    #handle.small > .handle-dot.bottom {
+      top: calc(100% - 2.5px);
+    }
+
+    #handle.small > #handle-bar {
+      width: 2px;
+      height: calc(100% - 5px);
     }
   `
 
-  private mouse: InteractiveLitElement = new InteractiveLitElement(this, undefined, { preventDefault: true });
+  constructor() {
+    super();
+    this.preventDefault = true;
+  }
+
+  protected firstUpdated(): void {
+    this.setupListeners(this.draggerRef.value!);
+    this.comparisonx = this.initialValue;
+    const width = this.getWidth();
+    this.x = this.comparisonx * width;
+  }
 
   draggerRef: Ref<HTMLDivElement> = createRef();
+
+  @property({ type: Object })
+  imageSize?: Position = [0, 0];
+
+  @property({ type: Object })
+  position: Position = [0, 0];
 
   @property({ type: Number })
   initialValue = 0.5;
@@ -92,82 +158,64 @@ export class ImageComparisonViewerDraggerHandle extends LitElement {
   x = 0;
 
   @state()
-  comparisonx: number | undefined;
+  comparisonx: number = 0.5;
 
   @state()
   width = 0;
 
-  setWidth() {
-    let parent = this.parentElement as HTMLElement;
-    if (parent === null) {
-      parent = (this.getRootNode() as any)?.host;
-    }
-    if (parent === null) {
-      throw new Error('Parent of drag handle is null');
-    } else {
-      this.width = parent.getBoundingClientRect().width;
-    }
-  }
+  @query('#container')
+  containerEl?: HTMLDivElement;
 
-  updateMouse(value: number) {
-    const x = value * this.width;
-    this.mouse.setPosition({
-      x,
-    });
-  }
-
-  protected firstUpdated(_changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>): void {
-    this.updateMouse(this.initialValue);
-  }
-
-  private setComparisonX() {
-    const { x, width, comparisonx } = this;
-    // const x = getX(this.x, this.width);
-    if (width > 0) {
-      const nextComparisonX = x / width;
-      if (nextComparisonX !== comparisonx) {
-        this.comparisonx = nextComparisonX;
-        this.dispatchEvent(new DraggerChangeEvent(this.comparisonx));
-      }
-    }
+  getWidth() {
+    return this.containerEl?.getBoundingClientRect().width || 0;
   }
 
   protected updated(_changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>): void {
-    const { zoom, mouse, x, width } = this;
-    this.setWidth();
-    if (x !== mouse.x) {
-      console.log('change x')
-      this.x = getX(mouse.x, width);
-      // this.x = getX(mouse.x, width / zoom) * zoom;
-    }
+    const { x, comparisonx } = this;
     if (_changedProperties.has('x')) {
-      console.log('x', x)
-      this.setComparisonX();
+      const width = this.getWidth();
+      if (width > 10) {
+        this.comparisonx = getX(x, width) / width;
+      }
     }
     if (_changedProperties.has('zoom')) {
-      console.log('zoom!', zoom)
+      const width = this.getWidth();
+      this.x = this.comparisonx * width;
+    }
+    if (_changedProperties.has('comparisonx') && comparisonx !== _changedProperties.get('comparisonx')) {
+      this.dispatchEvent(new DraggerChangeEvent(this.comparisonx));
     }
   }
 
   render() {
-    const { x, mouse, draggerRef, zoom } = this;
-    console.log('x', x);
-    // const x = getX(mouse.x, this.width);
+    const { comparisonx, active, imageSize, draggerRef, zoom, position } = this;
+    if (!imageSize) {
+      return null;
+    }
+
+    const width = this.getWidth();
+
+    const handleX = comparisonx * width;
+
+    const small = width < 100;
 
     return html`
-      <div
-        id="image-slider"
-        ${ref(draggerRef)}
-        class=${classMap({
-          active: mouse.active,
-        })}
-        style=${styleMap({
-          transform: `translate(${x}px, 0)`,
-        })}
-      >
-        <div class="image-slider-dot top"></div>
-        <div id="image-slider-bar"></div>
-        <div class="image-slider-dot bottom"></div>
+      <div id="container" style=${styleMap(getContainerStyle({ imageSize, zoom, position }))}>
+        <div
+          id="handle"
+          ${ref(draggerRef)}
+          class=${classMap({
+            active,
+            small,
+          })}
+          style=${styleMap({
+            transform: `translate(${handleX}px, 0)`,
+          })}
+        >
+          <div class="handle-dot top"></div>
+          <div id="handle-bar"></div>
+          <div class="handle-dot bottom"></div>
+        </div>
       </div>
     `;
   }

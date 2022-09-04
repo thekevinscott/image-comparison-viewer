@@ -57,7 +57,7 @@ export class ImageComparisonViewerApp extends LitElement {
     // `;
     return html`
       <div id="container">
-        <image-comparison-viewer showHandle zoom=${values['zoom']} background="${values['background']}">
+        <image-comparison-viewer zoom=${values['zoom']} background="${values['background']}">
           <img src="./assets/${imageKind}-a.jpg" />
           <img src="./assets/${imageKind}-b.jpg" />
         </image-comparison-viewer>

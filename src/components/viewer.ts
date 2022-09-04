@@ -6,10 +6,10 @@ import './background';
 import './mask';
 import './images';
 import './handle';
-import { InteractiveLitElement } from '../controllers/interaction-controller';
+import { InteractiveElement } from '../mixins/interactiveElement';
 import { DraggerChangeEvent } from './handle';
 
-export class ImageComparisonViewer extends LitElement {
+export class ImageComparisonViewer extends InteractiveElement {
   static styles = css`
     :host {
       display: block;
@@ -52,13 +52,9 @@ export class ImageComparisonViewer extends LitElement {
       left: 0;
     }
   `
-  private mouse: InteractiveLitElement = new InteractiveLitElement(this);
 
   @property()
   background: Background = 'striped';
-
-  @property({ type: Boolean })
-  showHandle = false;
 
   @property({ type: Number })
   zoom = 1
@@ -80,6 +76,7 @@ export class ImageComparisonViewer extends LitElement {
 
   constructor() {
     super();
+    this.setupListeners(this);
     const requestUpdate = () => this.requestUpdate();
     this.observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
@@ -109,10 +106,9 @@ export class ImageComparisonViewer extends LitElement {
   }
 
   getImageTransform() {
-    const { zoom, mouse } = this;
-    const x = mouse.x / zoom;
-    const y = mouse.y / zoom;
-    return `scale(${zoom}) translate(calc(${x}px), calc(${y}px))`;
+    const x = this.x / this.zoom;
+    const y = this.y / this.zoom;
+    return `scale(${this.zoom}) translate(calc(${x}px), calc(${y}px))`;
   }
 
   renderImage(img?: HTMLImageElement) {
@@ -144,48 +140,11 @@ export class ImageComparisonViewer extends LitElement {
     return parent.getBoundingClientRect();
   }
 
-  protected willUpdate(): void {
-    this.setHandlePosition();
-  }
-
-  // protected updated(): void {
-  //   console.log('viewer update')
-  // }
-
-  @state()
-  handlePosition = {}
-
-  setHandlePosition = () => {
-    const { images, zoom, mouse } = this;
-    const image = images?.[0] || images?.[1];
-    if (image) {
-      const imageSize = { width: image.width, height: image.height };
-      const { height, width } = this.getRect();
-      const y = mouse.y / zoom;
-      const x = mouse.x / zoom;
-      const top = ((height / 2) - (imageSize.height / 2 * zoom) - 2 + (y * zoom));
-      const left = ((width / 2) - (imageSize.width / 2 * zoom) + (x * zoom) + 0);
-      // this.comparisonx = left / width;
-      // console.log('new', this.comparisonx)
-      // console.log('left', left, 'width', width, 'comparisonX', this.comparisonx);
-      this.handlePosition = {
-        left: `${left}px`,
-        top: `${top}px`,
-        height: `${imageSize.height * zoom}px`,
-        width: `${imageSize.width * zoom}px`,
-        // transform: `scale(${zoom}`,
-      };
-    }
-  }
-
   render() {
-    const { showHandle, background, comparisonx, zoom, mouse } = this;
+    const { images, background, comparisonx, zoom, x, y, } = this;
+    const image = images?.[0] || images?.[1];
+    const imageSize = image ? [ image.width, image.height ] : undefined;
     return html`
-      ${showHandle && html`
-      <div id="handle-container" style=${styleMap(this.handlePosition)}>
-        <image-comparison-viewer-dragger-handle zoom=${zoom} initialValue=${comparisonx} @dragger-change-event=${this.handleDrag}></image-comparison-viewer-dragger-handle>
-      </div>
-      `}
       <slot name="background">
         <image-comparison-viewer-background background=${background}></image-comparison-viewer-background>
       </slot>
@@ -195,11 +154,23 @@ export class ImageComparisonViewer extends LitElement {
          ${this.renderImage(this.images?.[0])}
          </div>
          <div class="center-container">
-         <image-comparison-viewer-mask comparisonX=${comparisonx} width=${this.images?.[1].width} height=${this.images?.[1].height} zoom=${zoom} x=${mouse.x} y=${mouse.y}>
+         <image-comparison-viewer-mask comparisonX=${comparisonx} width=${this.images?.[1].width} height=${this.images?.[1].height} zoom=${zoom} x=${x} y=${y}>
           <img src="${this.images?.[1].src}" />
          </image-comparison-viewer-mask>
          </div>
       </image-comparison-viewer-images>
+      ${imageSize && html`
+        <div class="center-container">
+          <image-comparison-viewer-dragger-handle 
+            zoom=${zoom} 
+            initialValue=${comparisonx} 
+            @dragger-change-event=${this.handleDrag}
+            .imageSize=${imageSize}
+            .position=${[ x, y ]}
+          >
+          </image-comparison-viewer-dragger-handle>
+        </div>
+      `}
     `
   }
 }
