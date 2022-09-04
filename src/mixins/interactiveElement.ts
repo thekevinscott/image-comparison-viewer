@@ -8,7 +8,10 @@ const getTouch: PositionGetter<TouchEvent> = (e) => [e.touches[0].clientX, e.tou
 
 export class InteractiveElement extends LitElement {
   @state()
-  active = false
+  canMove = true;
+
+  @state()
+  active = false;
 
   @state()
   x = 0
@@ -47,7 +50,7 @@ export class InteractiveElement extends LitElement {
   private handleTouchStart = this.buildListener(getTouch, this.moveStart);
 
   private move: Action<MouseEvent | TouchEvent> = (x, y, e) => {
-    if (this.active && !e.defaultPrevented) {
+    if (this.active && !e.defaultPrevented && this.canMove) {
       if (this.preventDefault) {
         e.preventDefault();
       }
@@ -66,8 +69,8 @@ export class InteractiveElement extends LitElement {
   }
 
   protected setupListeners(host: LitElement | HTMLDivElement) {
-    host.addEventListener('mousedown', this.handleMouseDown);
-    host.addEventListener('touchstart', this.handleTouchStart);
+    host.addEventListener('mousedown', e => this.handleMouseDown(e as MouseEvent));
+    host.addEventListener('touchstart', e => this.handleTouchStart(e as TouchEvent));
 
     window.addEventListener('mousemove', this.handleMouseMove);
     window.addEventListener('touchmove', this.handleTouchMove);

@@ -36,23 +36,18 @@ const getContainerStyle: GetContainerStyle = ({
   position: [positionX, positionY],
   zoom,
 }) => {
-  // const { height, width } = this.getRect();
-  // const y = this.y / zoom;
-  // const x = this.x / zoom;
-  // const top = ((height / 2) - (imageSize.height / 2 * zoom) - 2 + (y * zoom));
-  // const left = ((width / 2) - (imageSize.width / 2 * zoom) + (x * zoom) + 0);
-  // // this.comparisonx = left / width;
-  // // console.log('new', this.comparisonx)
-  // // console.log('left', left, 'width', width, 'comparisonX', this.comparisonx);
   const x = positionX;
   const y = positionY;
-  // return `scale(${this.zoom}) translate(calc(${x}px), calc(${y}px))`;
-  return {
+  let style: Record<string, string> = {
     transform: `translate(calc(${x}px), calc(${y}px))`,
-    height: `${imageSizeHeight * zoom}px`,
-    width: `${imageSizeWidth * zoom}px`,
-    // transform: `scale(${zoom}`,
   };
+  if (imageSizeHeight > 0) {
+    style.height = `${imageSizeHeight * zoom}px`;
+  }
+  if (imageSizeWidth > 0) {
+    style.width = `${imageSizeWidth * zoom}px`;
+  }
+  return style;
 }
 
 export class ImageComparisonViewerDraggerHandle extends InteractiveElement {
@@ -133,17 +128,10 @@ export class ImageComparisonViewerDraggerHandle extends InteractiveElement {
     this.preventDefault = true;
   }
 
-  protected firstUpdated(): void {
-    this.setupListeners(this.draggerRef.value!);
-    this.comparisonx = this.initialValue;
-    const width = this.getWidth();
-    this.x = this.comparisonx * width;
-  }
-
   draggerRef: Ref<HTMLDivElement> = createRef();
 
   @property({ type: Object })
-  imageSize?: Position = [0, 0];
+  imageSize: Position = [0, 0];
 
   @property({ type: Object })
   position: Position = [0, 0];
@@ -170,8 +158,24 @@ export class ImageComparisonViewerDraggerHandle extends InteractiveElement {
     return this.containerEl?.getBoundingClientRect().width || 0;
   }
 
+  protected isValidImageSize() {
+    const { imageSize } = this;
+    return !!imageSize && imageSize[0] > 0 && imageSize[1] > 0;
+  }
+
+  protected firstUpdated(_changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>): void {
+    this.setupListeners(this.draggerRef.value!);
+    this.comparisonx = this.initialValue;
+    const width = this.getWidth();
+    this.x = this.comparisonx * width;
+  }
+
   protected updated(_changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>): void {
     const { x, comparisonx } = this;
+    if (_changedProperties.has('imageSize') && this.isValidImageSize()) {
+      const width = this.getWidth();
+      this.x = this.comparisonx * width;
+    }
     if (_changedProperties.has('x')) {
       const width = this.getWidth();
       if (width > 10) {
@@ -189,15 +193,12 @@ export class ImageComparisonViewerDraggerHandle extends InteractiveElement {
 
   render() {
     const { comparisonx, active, imageSize, draggerRef, zoom, position } = this;
-    if (!imageSize) {
-      return null;
-    }
-
     const width = this.getWidth();
 
     const handleX = comparisonx * width;
 
     const small = width < 100;
+
 
     return html`
       <div id="container" style=${styleMap(getContainerStyle({ imageSize, zoom, position }))}>

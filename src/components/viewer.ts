@@ -1,10 +1,11 @@
-import { html, css, LitElement, PropertyValueMap } from 'lit'
+import { html, css, PropertyValueMap } from 'lit'
 import { property, query, state } from 'lit/decorators.js'
 import { styleMap } from 'lit/directives/style-map.js';
 import { Background } from './background';
 import './background';
 import './mask';
 import './images';
+import Hammer from 'hammerjs';
 import './handle';
 import { InteractiveElement } from '../mixins/interactiveElement';
 import { DraggerChangeEvent } from './handle';
@@ -60,10 +61,16 @@ export class ImageComparisonViewer extends InteractiveElement {
   zoom = 1
 
   @state()
+  startingZoom = 1
+
+  @state()
   comparisonx = .5
 
   @state()
   images: HTMLImageElement[] | undefined;
+
+  @state()
+  imageSize?: [number, number];
 
   @query('#slot')
   mainSlot?: HTMLSlotElement;
@@ -73,6 +80,9 @@ export class ImageComparisonViewer extends InteractiveElement {
   }
 
   observer: MutationObserver;
+
+  @state()
+  isPinching = true;
 
   constructor() {
     super();
@@ -85,6 +95,25 @@ export class ImageComparisonViewer extends InteractiveElement {
         }
       });
     });
+
+    const mc = new Hammer.Manager(this);
+    mc.add(new Hammer.Pinch({ threshold: 0 }));
+
+
+    mc.on('pinchstart', () => {
+      this.isPinching = true;
+      this.canMove = false;
+      this.startingZoom = this.zoom;
+    });
+    mc.on('pinchend', () => {
+      this.isPinching = false;
+      this.canMove = true;
+      this.startingZoom = this.zoom;
+    });
+
+    mc.on('pinch', (e) => {
+      this.zoom = e.scale * this.startingZoom;
+    });
   }
 
   handleSlotchange() {
@@ -93,6 +122,7 @@ export class ImageComparisonViewer extends InteractiveElement {
     if (childNodes.length > 2) {
       console.warn('Only two images are supported')
     } else {
+      this.imageSize = undefined;
       this.images = childNodes;
       this.observer.disconnect();
       requestUpdate();
@@ -125,7 +155,6 @@ export class ImageComparisonViewer extends InteractiveElement {
 
   handleDrag = ({ detail }: DraggerChangeEvent) => {
     this.comparisonx = detail.x;
-    // console.log('handled', this.comparisonx);
     this.requestUpdate();
   }
 
@@ -140,10 +169,22 @@ export class ImageComparisonViewer extends InteractiveElement {
     return parent.getBoundingClientRect();
   }
 
+  protected updated(_changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>): void {
+    if (_changedProperties.has('images')) {
+      const { images } = this;
+      const image = images?.[0] || images?.[1];
+      if (image) {
+        image.onload = () => {
+          if (this) {
+            this.imageSize = [image.width, image.height];
+          }
+        }
+      }
+    }
+  }
+
   render() {
-    const { images, background, comparisonx, zoom, x, y, } = this;
-    const image = images?.[0] || images?.[1];
-    const imageSize = image ? [ image.width, image.height ] : undefined;
+    const { imageSize, background, comparisonx, zoom, x, y, } = this;
     return html`
       <slot name="background">
         <image-comparison-viewer-background background=${background}></image-comparison-viewer-background>
