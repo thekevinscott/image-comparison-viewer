@@ -1,4 +1,4 @@
 [build.environment]
   NPM_FLAGS = "--version"
 [build]
-  command = "npx pnpm install --store=node_modules/.pnpm-store && pnpm build && pnpm run build:docs"
+  command = "npx pnpm install --store=node_modules/.pnpm-store && npx pnpm build && npx pnpm run build:docs"
