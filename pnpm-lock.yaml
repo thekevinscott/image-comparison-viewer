@@ -3,14 +3,12 @@ lockfileVersion: 5.4
 specifiers:
   '@types/hammerjs': ^2.0.41
   '@types/node': ^18.7.3
-  hammer-touchemulator: ^0.0.2
   hammerjs: ^2.0.8
   lit: ^2.0.2
   typescript: ^4.5.4
   vite: ^2.9.15
 
 dependencies:
-  hammer-touchemulator: 0.0.2
   hammerjs: 2.0.8
   lit: 2.3.0
 
@@ -267,10 +265,6 @@ packages:
   /function-bind/1.1.1:
     resolution: {integrity: sha512-yIovAzMX49sF8Yl58fSCWJ5svSLuaibPxXQJFLmBObTuCr0Mf1KiPopGM9NiFjiYBCbfaa2Fh6breQ6ANVTI0A==}
     dev: true
-
-  /hammer-touchemulator/0.0.2:
-    resolution: {integrity: sha512-NnH4nBhI18GeT2PdfJWmTeuTAR8IowNtvxL6QQLNk6lo2uJ29rFSstOJ9ZjdVsqbjosVXFCi3SEChiagCPo0aQ==}
-    dev: false
 
   /hammerjs/2.0.8:
     resolution: {integrity: sha512-tSQXBXS/MWQOn/RKckawJ61vvsDpCom87JgxiYdGwHdOa0ht0vzUWDlfioofFCRU0L+6NGDt6XzbgoJvZkMeRQ==}
