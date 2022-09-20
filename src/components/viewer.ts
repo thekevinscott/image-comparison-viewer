@@ -79,13 +79,12 @@ export class ImageComparisonViewer extends InteractiveElement {
     return this.mainSlot?.assignedNodes({ flatten: true }).filter(el => (<Element>el).tagName === 'IMG') as HTMLImageElement[] || [];
   }
 
-  observer: MutationObserver;
+  observer?: MutationObserver;
 
   @state()
   isPinching = true;
 
-  constructor() {
-    super();
+  connectedCallback() {
     this.setupListeners(this);
     const requestUpdate = () => this.requestUpdate();
     this.observer = new MutationObserver((mutations) => {
@@ -124,11 +123,11 @@ export class ImageComparisonViewer extends InteractiveElement {
     } else {
       this.imageSize = undefined;
       this.images = childNodes;
-      this.observer.disconnect();
+      this.observer?.disconnect();
       requestUpdate();
 
       this.images.forEach(image => {
-        this.observer.observe(image, {
+        this.observer?.observe(image, {
           attributes: true,
         });
       })
