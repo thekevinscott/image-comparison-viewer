@@ -85,6 +85,7 @@ export class ImageComparisonViewer extends InteractiveElement {
   isPinching = true;
 
   connectedCallback() {
+    super.connectedCallback();
     this.setupListeners(this);
     const requestUpdate = () => this.requestUpdate();
     this.observer = new MutationObserver((mutations) => {
@@ -114,6 +115,7 @@ export class ImageComparisonViewer extends InteractiveElement {
       this.zoom = e.scale * this.startingZoom;
     });
   }
+
 
   handleSlotchange() {
     const requestUpdate = () => this.requestUpdate();
