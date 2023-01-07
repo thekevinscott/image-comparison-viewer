@@ -1,7 +1,6 @@
 import { html, css, PropertyValueMap } from 'lit'
 import { property, query, state } from 'lit/decorators.js'
 import { createRef, Ref, ref } from 'lit/directives/ref.js';
-import { styleMap } from 'lit/directives/style-map.js';
 import { Background } from './background';
 import './background';
 import './mask';
@@ -12,6 +11,18 @@ import { InteractiveElement } from '../mixins/interactiveElement';
 import { DraggerChangeEvent } from './handle';
 
 type ImageElement = HTMLImageElement | HTMLCanvasElement;
+type ImageSize = [number, number];
+
+const isImageElement = (el?: unknown): el is ImageElement => {
+  if (!el || typeof el !== 'object' || !('innerHTML' in el)) {
+    return false;
+  }
+
+  return [
+    'IMG',
+    'CANVAS',
+  ].includes((<Element>el).tagName);
+}
 
 export class ImageComparisonViewer extends InteractiveElement {
   static styles = css`
@@ -70,16 +81,15 @@ export class ImageComparisonViewer extends InteractiveElement {
   comparisonx = .5
 
   @state()
-  imageSize?: [number, number];
+  imageSize?: ImageSize;
 
   @query('#slot')
   mainSlot?: HTMLSlotElement;
 
   getChildNodes(): Array<ImageElement> {
-    return this.mainSlot?.assignedNodes({ flatten: true }).filter(el => [
-      'IMG',
-      'CANVAS',
-    ].includes((<Element>el).tagName)) as ImageElement[] || [];
+    return this.mainSlot?.assignedNodes({
+      flatten: true,
+    }).filter(isImageElement) as ImageElement[] || [];
   }
 
   observer?: MutationObserver;
@@ -148,8 +158,8 @@ export class ImageComparisonViewer extends InteractiveElement {
 
       imageAContainer.appendChild(childNodes[0]);
       imageBContainer.appendChild(childNodes[1]);
-      const imageSizeA = [imageA.width, imageA.height];
-      const imageSizeB = [imageB.width, imageB.height];
+      const imageSizeA: ImageSize = [imageA.width, imageA.height];
+      const imageSizeB: ImageSize = [imageB.width, imageB.height];
       if (imageSizeA[0] !== imageSizeB[0] || imageSizeA[1] !== imageSizeB[1]) {
         throw new Error([
           `Images do not match in size.`,
@@ -169,7 +179,7 @@ export class ImageComparisonViewer extends InteractiveElement {
 
   updated(_p: PropertyValueMap<any> | Map<PropertyKey, unknown>) {
     const imageA = this.imageAContainer.value?.children[0];
-    if (imageA && (_p.has('x') || _p.has('y') || _p.has('active') || _p.has('comparisonx') || _p.has('zoom'))) {
+    if (isImageElement(imageA) && (_p.has('x') || _p.has('y') || _p.has('active') || _p.has('comparisonx') || _p.has('zoom'))) {
       const transform = this.getImageTransform();
       imageA.style.transform = transform;
     }
