@@ -1,5 +1,6 @@
-import { html, css, LitElement } from 'lit'
+import { html, css, LitElement, PropertyValueMap } from 'lit'
 import { customElement, state } from 'lit/decorators.js'
+import { createRef, Ref, ref } from 'lit/directives/ref.js';
 import { FilterChangeEvent } from './filters';
 import '../src/components/viewer';
 import '../src/components/handle';
@@ -17,14 +18,16 @@ export class ImageComparisonViewerApp extends LitElement {
     }
 
     #container {
-      height: 500px; 
+      height: 500px;
       border: 1px solid rgba(0,0,0,0.2);
     }
 
     #filters {
       display: flex;
     }
-  `
+  `;
+
+  canvasRef: Ref<HTMLCanvasElement> = createRef();
 
   @state()
   values: Record<string, number | string> = {
@@ -35,6 +38,26 @@ export class ImageComparisonViewerApp extends LitElement {
   handleChange = ({ detail }: FilterChangeEvent) => {
     this.values[detail.name] = detail.value;
     this.requestUpdate();
+  }
+
+  protected updated(_changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>): void {
+    if (_changedProperties.has('imageKind')) {
+      this.updateCanvas(this.imageKind);
+    }
+  }
+
+  firstUpdated() {
+    this.updateCanvas(this.imageKind);
+  }
+
+  updateCanvas(imageKind: string) {
+    const canvas = this.canvasRef.value!;
+    const img = new Image();
+    img.onload = () => {
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0);
+    };
+    img.src = imageKind === 'jellyfish' ? jellyfishA : dogA;
   }
 
   @state()
@@ -49,8 +72,8 @@ export class ImageComparisonViewerApp extends LitElement {
     return html`
       <div id="container">
         <image-comparison-viewer zoom=${values['zoom']} background="${values['background']}">
-          <img src="${imageKind === 'jellyfish' ? jellyfishA : dogA}" />
-          <img src="${imageKind === 'jellyfish' ? jellyfishB : dogB}" />
+          <canvas width="199" height="199" ${ref(this.canvasRef)}></canvas>
+          <img width="199" height="199" src="${imageKind === 'jellyfish' ? jellyfishB : dogB}" />
         </image-comparison-viewer>
       </div id="container">
       <image-comparison-viewer-filters @filter-change-event=${handleChange} .values=${values}></image-comparison-viewer-filters>

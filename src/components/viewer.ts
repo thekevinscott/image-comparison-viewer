@@ -1,5 +1,6 @@
 import { html, css, PropertyValueMap } from 'lit'
 import { property, query, state } from 'lit/decorators.js'
+import { createRef, Ref, ref } from 'lit/directives/ref.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { Background } from './background';
 import './background';
@@ -9,6 +10,8 @@ import Hammer from 'hammerjs';
 import './handle';
 import { InteractiveElement } from '../mixins/interactiveElement';
 import { DraggerChangeEvent } from './handle';
+
+type ImageElement = HTMLImageElement | HTMLCanvasElement;
 
 export class ImageComparisonViewer extends InteractiveElement {
   static styles = css`
@@ -67,22 +70,25 @@ export class ImageComparisonViewer extends InteractiveElement {
   comparisonx = .5
 
   @state()
-  images: HTMLImageElement[] | undefined;
-
-  @state()
   imageSize?: [number, number];
 
   @query('#slot')
   mainSlot?: HTMLSlotElement;
 
-  getChildNodes(): Array<HTMLImageElement> {
-    return this.mainSlot?.assignedNodes({ flatten: true }).filter(el => (<Element>el).tagName === 'IMG') as HTMLImageElement[] || [];
+  getChildNodes(): Array<ImageElement> {
+    return this.mainSlot?.assignedNodes({ flatten: true }).filter(el => [
+      'IMG',
+      'CANVAS',
+    ].includes((<Element>el).tagName)) as ImageElement[] || [];
   }
 
   observer?: MutationObserver;
 
   @state()
   isPinching = true;
+
+  imageAContainer: Ref<HTMLDivElement> = createRef();
+  imageBContainer: Ref<HTMLDivElement> = createRef();
 
   connectedCallback() {
     super.connectedCallback();
@@ -120,19 +126,38 @@ export class ImageComparisonViewer extends InteractiveElement {
   handleSlotchange() {
     const requestUpdate = () => this.requestUpdate();
     const childNodes = this.getChildNodes();
-    if (childNodes.length > 2) {
-      console.warn('Only two images are supported')
-    } else {
+    if (childNodes.length === 2) {
       this.imageSize = undefined;
-      this.images = childNodes;
       this.observer?.disconnect();
       requestUpdate();
 
-      this.images.forEach(image => {
+      childNodes.forEach(image => {
         this.observer?.observe(image, {
           attributes: true,
         });
-      })
+      });
+
+      // clear out existing content
+      const imageAContainer = this.imageAContainer.value!;
+      imageAContainer.innerHTML = '';
+      const imageBContainer = this.imageBContainer.value!;
+      imageBContainer.innerHTML = '';
+
+      const imageA = childNodes[0];
+      const imageB = childNodes[1];
+
+      imageAContainer.appendChild(childNodes[0]);
+      imageBContainer.appendChild(childNodes[1]);
+      const imageSizeA = [imageA.width, imageA.height];
+      const imageSizeB = [imageB.width, imageB.height];
+      if (imageSizeA[0] !== imageSizeB[0] || imageSizeA[1] !== imageSizeB[1]) {
+        throw new Error([
+          `Images do not match in size.`,
+          `First image: ${JSON.stringify(imageSizeA)}`,
+          `Second image: ${JSON.stringify(imageSizeB)}`,
+        ].join(' '));
+      }
+      this.imageSize = imageSizeA;
     }
   }
 
@@ -142,16 +167,12 @@ export class ImageComparisonViewer extends InteractiveElement {
     return `scale(${this.zoom}) translate(calc(${x}px), calc(${y}px))`;
   }
 
-  renderImage(img?: HTMLImageElement) {
-    if (img) {
+  updated(_p: PropertyValueMap<any> | Map<PropertyKey, unknown>) {
+    const imageA = this.imageAContainer.value?.children[0];
+    if (imageA && (_p.has('x') || _p.has('y') || _p.has('active') || _p.has('comparisonx') || _p.has('zoom'))) {
       const transform = this.getImageTransform();
-      const style = styleMap({
-        transform,
-      });
-      return html`<img style=${style} src="${img.src}" />`;
+      imageA.style.transform = transform;
     }
-
-    return null;
   }
 
   handleDrag = ({ detail }: DraggerChangeEvent) => {
@@ -170,20 +191,6 @@ export class ImageComparisonViewer extends InteractiveElement {
     return parent.getBoundingClientRect();
   }
 
-  protected updated(_changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>): void {
-    if (_changedProperties.has('images')) {
-      const { images } = this;
-      const image = images?.[0] || images?.[1];
-      if (image) {
-        image.onload = () => {
-          if (this) {
-            this.imageSize = [image.width, image.height];
-          }
-        }
-      }
-    }
-  }
-
   render() {
     const { imageSize, background, comparisonx, zoom, x, y, } = this;
     return html`
@@ -192,20 +199,26 @@ export class ImageComparisonViewer extends InteractiveElement {
       </slot>
       <image-comparison-viewer-images>
         <slot id="slot" @slotchange=${this.handleSlotchange}></slot>
-        <div class="center-container">
-         ${this.renderImage(this.images?.[0])}
+        <div class="center-container" ${ref(this.imageAContainer)}>
         </div>
         <div class="center-container">
-          <image-comparison-viewer-mask comparisonX=${comparisonx} width=${this.images?.[1].width} height=${this.images?.[1].height} zoom=${zoom} x=${x} y=${y}>
-            <img src="${this.images?.[1].src}" />
+          <image-comparison-viewer-mask
+            comparisonX=${comparisonx}
+            width="${imageSize?.[0]}"
+            height="${imageSize?.[1]}"
+            zoom=${zoom}
+            x=${x}
+            y=${y}
+            ${ref(this.imageBContainer)}
+          >
           </image-comparison-viewer-mask>
         </div>
       </image-comparison-viewer-images>
       ${imageSize && html`
         <div class="center-container">
-          <image-comparison-viewer-dragger-handle 
-            zoom=${zoom} 
-            initialValue=${comparisonx} 
+          <image-comparison-viewer-dragger-handle
+            zoom=${zoom}
+            initialValue=${comparisonx}
             @dragger-change-event=${this.handleDrag}
             .imageSize=${imageSize}
             .position=${[ x, y ]}
