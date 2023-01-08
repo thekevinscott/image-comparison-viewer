@@ -1,8 +1,9 @@
 {
   "name": "image-comparison-viewer",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "exports": {
-    ".": "./dist/image-comparison-viewer.es.js"
+    ".old": "./dist/image-comparison-viewer.es.js",
+    ".": "./src/index.ts"
   },
   "types": "./types",
   "files": [

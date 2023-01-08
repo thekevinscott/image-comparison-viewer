@@ -12,6 +12,11 @@ import { DraggerChangeEvent } from './handle';
 
 type ImageElement = HTMLImageElement | HTMLCanvasElement;
 type ImageSize = [number, number];
+type ValidChildNodes = [ImageElement, ImageElement];
+
+const isValidChildNodes = (nodes?: unknown): nodes is ValidChildNodes => {
+  return !!nodes && Array.isArray(nodes) && nodes.filter(isImageElement).length === 2;
+};
 
 const isImageElement = (el?: unknown): el is ImageElement => {
   if (!el || typeof el !== 'object' || !('innerHTML' in el)) {
@@ -35,14 +40,14 @@ export class ImageComparisonViewer extends InteractiveElement {
       touch-action: manipulation;
       cursor: grab;
     }
-    
+
     ::slotted(img) {
       display: none;
     }
 
     img {
       display: block;
-      user-drag: none;  
+      user-drag: none;
       user-select: none;
       -moz-user-select: none;
       -webkit-user-drag: none;
@@ -86,6 +91,8 @@ export class ImageComparisonViewer extends InteractiveElement {
   @query('#slot')
   mainSlot?: HTMLSlotElement;
 
+  imageElements?: ValidChildNodes;
+
   getChildNodes(): Array<ImageElement> {
     return this.mainSlot?.assignedNodes({
       flatten: true,
@@ -103,11 +110,10 @@ export class ImageComparisonViewer extends InteractiveElement {
   connectedCallback() {
     super.connectedCallback();
     this.setupListeners(this);
-    const requestUpdate = () => this.requestUpdate();
     this.observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         if (mutation.type === "attributes") {
-          requestUpdate();
+          this.renderImages();
         }
       });
     });
@@ -132,14 +138,11 @@ export class ImageComparisonViewer extends InteractiveElement {
     });
   }
 
-
-  handleSlotchange() {
-    const requestUpdate = () => this.requestUpdate();
-    const childNodes = this.getChildNodes();
-    if (childNodes.length === 2) {
+  renderImages() {
+    const childNodes = this.imageElements;
+    if (isValidChildNodes(childNodes)) {
       this.imageSize = undefined;
       this.observer?.disconnect();
-      requestUpdate();
 
       childNodes.forEach(image => {
         this.observer?.observe(image, {
@@ -168,20 +171,35 @@ export class ImageComparisonViewer extends InteractiveElement {
         ].join(' '));
       }
       this.imageSize = imageSizeA;
+      this.updateImageAStyle();
     }
   }
 
-  getImageTransform() {
-    const x = this.x / this.zoom;
-    const y = this.y / this.zoom;
-    return `scale(${this.zoom}) translate(calc(${x}px), calc(${y}px))`;
+  handleSlotchange() {
+    const childNodes = this.getChildNodes();
+    if (childNodes.length === 2) {
+      this.imageElements = childNodes as [ImageElement, ImageElement];
+      this.renderImages();
+    }
+  }
+
+  updateImageAStyle() {
+    const imageA = this.imageAContainer.value?.children[0];
+    if (isImageElement(imageA)) {
+      const x = this.x / this.zoom;
+      const y = this.y / this.zoom;
+      const transform = `scale(${this.zoom}) translate(calc(${x}px), calc(${y}px))`;
+      imageA.style.transform = transform;
+    }
+  }
+
+  firstUpdated() {
+    this.updateImageAStyle();
   }
 
   updated(_p: PropertyValueMap<any> | Map<PropertyKey, unknown>) {
-    const imageA = this.imageAContainer.value?.children[0];
-    if (isImageElement(imageA) && (_p.has('x') || _p.has('y') || _p.has('active') || _p.has('comparisonx') || _p.has('zoom'))) {
-      const transform = this.getImageTransform();
-      imageA.style.transform = transform;
+    if (_p.has('x') || _p.has('y') || _p.has('active') || _p.has('comparisonx') || _p.has('zoom')) {
+      this.updateImageAStyle();
     }
   }
 
