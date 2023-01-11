@@ -70,13 +70,13 @@ export class InteractiveElement extends LitElement {
 
   protected setupListeners(host: LitElement | HTMLDivElement) {
     host.addEventListener('mousedown', e => this.handleMouseDown(e as MouseEvent));
-    host.addEventListener('touchstart', e => this.handleTouchStart(e as TouchEvent), { passive: true });
+    host.addEventListener('touchstart', e => this.handleTouchStart(e as TouchEvent), { passive: false });
 
     window.addEventListener('mousemove', this.handleMouseMove);
-    window.addEventListener('touchmove', this.handleTouchMove, { passive: true });
+    window.addEventListener('touchmove', this.handleTouchMove, { passive: false });
 
     window.addEventListener('mouseup', this.end);
-    window.addEventListener('touchend', this.end, { passive: true });
+    window.addEventListener('touchend', this.end, { passive: false });
   }
 
   disconnectedCallback(): void {
